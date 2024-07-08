@@ -39,9 +39,10 @@
       </div>
       <div v-if="showDuplicateItems">
         <h2>Duplicate Items</h2>
-        <ul v-if="duplicateItems.length">
-          <li v-for="(item, index) in duplicateItems" :key="index">
-            {{ item }}
+        <ul v-if="sortedDuplicateItems.length">
+          <li v-for="(item, index) in sortedDuplicateItems" :key="index">
+            <img :src="item.image" alt="Item image" class="item-image" />
+            {{ item.name }} - Marketable: {{ item.marketable ? "Yes" : "No" }}
           </li>
         </ul>
         <p v-else>No duplicate items found.</p>
@@ -49,7 +50,10 @@
       <div v-if="showInventoryItems">
         <h2>Inventory Items</h2>
         <ul>
-          <li v-for="(item, index) in items" :key="index">{{ item.name }}</li>
+          <li v-for="(item, index) in sortedItems" :key="index">
+            <img :src="item.image" alt="Item image" class="item-image" />
+            {{ item.name }} - Marketable: {{ item.marketable ? "Yes" : "No" }}
+          </li>
         </ul>
       </div>
     </div>
@@ -88,6 +92,16 @@ export default {
       ],
     };
   },
+  computed: {
+    sortedItems() {
+      return this.items.slice().sort((a, b) => b.marketable - a.marketable);
+    },
+    sortedDuplicateItems() {
+      return this.duplicateItems
+        .slice()
+        .sort((a, b) => b.marketable - a.marketable);
+    },
+  },
   methods: {
     async fetchInventory() {
       this.isLoading = true; // Start the loading spinner
@@ -110,6 +124,8 @@ export default {
             this.items.push(
               ...data.descriptions.map((item) => ({
                 name: item.market_hash_name,
+                marketable: item.marketable === 1,
+                image: `http://cdn.steamcommunity.com/economy/image/${item.icon_url}`,
               }))
             );
           }
@@ -134,14 +150,22 @@ export default {
       }
     },
     findDuplicates() {
-      const itemNames = this.items.map((item) => item.name);
-      const counts = itemNames.reduce((acc, item) => {
-        acc[item] = (acc[item] || 0) + 1;
+      const itemCounts = this.items.reduce((acc, item) => {
+        acc[item.name] = acc[item.name] || {
+          count: 0,
+          marketable: item.marketable,
+          image: item.image,
+        };
+        acc[item.name].count += 1;
         return acc;
       }, {});
-      this.duplicateItems = Object.keys(counts).filter(
-        (item) => counts[item] > 1
-      );
+      this.duplicateItems = Object.keys(itemCounts)
+        .filter((name) => itemCounts[name].count > 1)
+        .map((name) => ({
+          name,
+          marketable: itemCounts[name].marketable,
+          image: itemCounts[name].image,
+        }));
     },
     toggleDuplicateItems() {
       this.showDuplicateItems = !this.showDuplicateItems;
@@ -199,5 +223,11 @@ export default {
 
 .toggle-buttons button:hover {
   background-color: #0056b3;
+}
+
+.item-image {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
 }
 </style>
