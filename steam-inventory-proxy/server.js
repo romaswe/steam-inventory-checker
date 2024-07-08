@@ -10,9 +10,10 @@ app.use(cors());
 app.get("/inventory/:steamId/:appId/:contextId", async (req, res) => {
   const { steamId, appId, contextId } = req.params;
   const { start_assetid } = req.query;
-  const url = `https://steamcommunity.com/inventory/${steamId}/${appId}/${contextId}?l=english&count=3000${
+  const url = `https://steamcommunity.com/inventory/${steamId}/${appId}/${contextId}?l=english&count=150${
     start_assetid ? `&start_assetid=${start_assetid}` : ""
   }`;
+  console.log(url);
 
   try {
     const response = await fetch(url);

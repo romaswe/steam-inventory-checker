@@ -2,11 +2,11 @@
   <div class="inventory-checker">
     <h1>Steam Inventory Checker</h1>
     <form @submit.prevent="fetchInventory">
-      <div>
+      <div class="form-group">
         <label for="steamId">Steam ID:</label>
         <input type="text" id="steamId" v-model="steamId" required />
       </div>
-      <div>
+      <div class="form-group">
         <label for="appId">App ID:</label>
         <select id="appId" v-model="gameInfo" required>
           <option disabled value="">Select a game</option>
@@ -38,21 +38,27 @@
         </button>
       </div>
       <div v-if="showDuplicateItems">
-        <h2>Duplicate Items</h2>
+        <h2>Duplicate Items ({{ sortedDuplicateItems.length }})</h2>
         <ul v-if="sortedDuplicateItems.length">
           <li v-for="(item, index) in sortedDuplicateItems" :key="index">
             <img :src="item.image" alt="Item image" class="item-image" />
-            {{ item.name }} - Marketable: {{ item.marketable ? "Yes" : "No" }}
+            <span
+              >{{ item.name }} - Marketable:
+              {{ item.marketable ? "Yes" : "No" }}</span
+            >
           </li>
         </ul>
         <p v-else>No duplicate items found.</p>
       </div>
       <div v-if="showInventoryItems">
-        <h2>Inventory Items</h2>
+        <h2>Inventory Items ({{ sortedItems.length }})</h2>
         <ul>
           <li v-for="(item, index) in sortedItems" :key="index">
             <img :src="item.image" alt="Item image" class="item-image" />
-            {{ item.name }} - Marketable: {{ item.marketable ? "Yes" : "No" }}
+            <span
+              >{{ item.name }} - Marketable:
+              {{ item.marketable ? "Yes" : "No" }}</span
+            >
           </li>
         </ul>
       </div>
@@ -113,17 +119,21 @@ export default {
 
         while (moreItems) {
           const response = await fetch(
-            `http://localhost:3000/inventory/${this.steamId}/${this.gameInfo.appId}/${this.gameInfo.contextId}?start_assetid=${startAssetId}`
+            `http://localhost:3000/inventory/${this.steamId}/${
+              this.gameInfo.appId
+            }/${this.gameInfo.contextId}?${
+              startAssetId ? `&start_assetid=${startAssetId}` : ""
+            }`
           );
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
 
           const data = await response.json();
-          if (data.assets) {
+          if (data.descriptions) {
             this.items.push(
               ...data.descriptions.map((item) => ({
-                name: item.market_hash_name,
+                name: item.name.trim().toLowerCase(),
                 marketable: item.marketable === 1,
                 image: `http://cdn.steamcommunity.com/economy/image/${item.icon_url}`,
               }))
@@ -183,6 +193,44 @@ export default {
   margin: 0 auto;
   padding: 20px;
   text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+input,
+select {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+button[type="submit"] {
+  padding: 10px 20px;
+  margin-top: 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
 }
 
 .spinner {
@@ -225,9 +273,28 @@ export default {
   background-color: #0056b3;
 }
 
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
 .item-image {
   width: 32px;
   height: 32px;
   margin-right: 10px;
+}
+
+span {
+  font-size: 1rem;
 }
 </style>
