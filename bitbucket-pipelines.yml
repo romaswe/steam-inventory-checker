@@ -6,6 +6,6 @@ pipelines:
         clone:
           enabled: false
         script:
-          - git clone --bare git@github.com:romaswe/steam-inventory-checker.git
+          - git clone --bare romaswe@bitbucket.org/romaswe/steam-inventory.git
           - cd steam-inventory-checker.git
           - git push --mirror git@github.com:romaswe/steam-inventory-checker.git
