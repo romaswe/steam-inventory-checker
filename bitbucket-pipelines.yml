@@ -7,5 +7,5 @@ pipelines:
           enabled: false
         script:
           - git clone --bare git@bitbucket.org:romaswe/steam-inventory.git
-          - cd steam-inventory-checker.git
+          - cd steam-inventory.git
           - git push --mirror git@github.com:romaswe/steam-inventory-checker.git
