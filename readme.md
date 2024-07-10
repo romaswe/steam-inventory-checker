@@ -23,8 +23,7 @@ A web application built with Vue.js that allows users to check their Steam inven
 
 ## Prerequisites
 
-- Node.js and npm installed on your machine.
-- Vue CLI installed globally (`npm install -g @vue/cli`).
+- Docker and Docker Compose installed on your machine.
 
 ## Installation
 
@@ -35,51 +34,21 @@ A web application built with Vue.js that allows users to check their Steam inven
    cd steam-inventory
    ```
 
-2. Install the dependencies for the Vue.js application:
-
-   ```sh
-   cd steam-inventory-checker
-   npm install
-   ```
-
-3. Navigate to the `steam-inventory-proxy` directory and install its dependencies:
-
-   ```sh
-   cd ../steam-inventory-proxy
-   npm install
-   ```
-
 ## Usage
 
-### Running the Proxy Server
+### Running the Application with Docker
 
-1. Start the proxy server:
-
-   ```sh
-   npm start
-   ```
-
-   The proxy server will run on `http://localhost:3000`.
-
-### Running the Vue.js Application
-
-1. Navigate to the `steam-inventory-checker` directory:
+1. Build and start the services using Docker Compose:
 
    ```sh
-   cd ../steam-inventory-checker
+   docker-compose up --build
    ```
 
-2. Start the Vue.js development server:
-
-   ```sh
-   npm run serve
-   ```
-
-   The application will be available at `http://localhost:8080`.
+   This command will build the Docker images for both the frontend and backend services and start them. The Vue.js frontend will be accessible at `http://localhost:5000` and the Express.js backend at `http://localhost:3000`.
 
 ### Checking Steam Inventory
 
-1. Open the application in your web browser at `http://localhost:8080`.
+1. Open the application in your web browser at `http://localhost:5000`.
 2. Enter a valid Steam ID.
 3. Select a game from the dropdown menu.
 4. Click the "Check Inventory" button.
@@ -99,16 +68,19 @@ steam-inventory/
 │   │   ├── App.vue
 │   │   ├── main.js
 │   │   └── ...
+│   ├── Dockerfile
 │   ├── package.json
 │   ├── package-lock.json
 │   └── ...
 │
 ├── steam-inventory-proxy/
 │   ├── node_modules/
+│   ├── Dockerfile
 │   ├── package.json
 │   ├── package-lock.json
 │   └── server.js
 │
+├── docker-compose.yml
 └── README.md
 ```
 
@@ -143,4 +115,4 @@ The proxy server is defined in `steam-inventory-proxy/server.js`:
 - Defines a single route `/inventory/:steamId/:appId/:contextId` to fetch inventory data from the Steam API.
 - Handles errors and returns the data in JSON format.
 
-By following the steps outlined above, you can set up and run the Steam Inventory Checker application on your local machine. If you encounter any issues, please refer to the [Contributing](#contributing) section for support.
+By following the steps outlined above, you can set up and run the Steam Inventory Checker application using Docker. If you encounter any issues, please refer to the [Contributing](#contributing) section for support.

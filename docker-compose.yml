@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./steam-inventory-checker
+    ports:
+      - "5000:5000"
+    networks:
+      - steam-inventory-network
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./steam-inventory-proxy
+    ports:
+      - "3000:3000"
+    networks:
+      - steam-inventory-network
+
+networks:
+  steam-inventory-network:
+    driver: bridge
