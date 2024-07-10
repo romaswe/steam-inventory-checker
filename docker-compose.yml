@@ -1,24 +1,23 @@
-version: "3.8"
-
+version: "3"
 services:
-  frontend:
-    build:
-      context: ./steam-inventory-checker
-    ports:
-      - "5000:5000"
-    networks:
-      - steam-inventory-network
-    depends_on:
-      - backend
-
   backend:
-    build:
-      context: ./steam-inventory-proxy
+    build: ./steam-inventory-proxy
     ports:
       - "3000:3000"
-    networks:
-      - steam-inventory-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
 
-networks:
-  steam-inventory-network:
-    driver: bridge
+  frontend:
+    build: ./steam-inventory-checker
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
