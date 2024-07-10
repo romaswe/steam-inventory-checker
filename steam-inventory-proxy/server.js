@@ -24,6 +24,10 @@ app.get("/inventory/:steamId/:appId/:contextId", async (req, res) => {
   }
 });
 
+app.get("/test", async (req, res) => {
+  res.status(200).json({ message: "test endpoint" });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
