@@ -114,8 +114,11 @@ export default {
         this.isLoading = true;
         this.error = null;
 
+        const backendUrl =
+          process.env.VUE_APP_BACKEND_URL || "http://localhost:3000/inventory";
+
         const response = await fetch(
-          `http://localhost:3000/inventory/${this.steamId}/${this.gameInfo.appId}/${this.gameInfo.contextId}`
+          `${backendUrl}/${this.steamId}/${this.gameInfo.appId}/${this.gameInfo.contextId}`
         );
 
         if (!response.ok) {
@@ -157,6 +160,9 @@ export default {
         if (!description) continue;
 
         const name = description.name.trim();
+        const steamImageUrl =
+          process.env.VUE_APP_STEAM_IMAGE_URL ||
+          "http://cdn.steamcommunity.com/economy/image";
 
         if (itemMap.has(name)) {
           // If the name already exists in the map, it's a duplicate
@@ -164,7 +170,7 @@ export default {
             ...item,
             name,
             marketable: description.marketable,
-            image: `http://cdn.steamcommunity.com/economy/image/${description.icon_url}`,
+            image: `${steamImageUrl}/${description.icon_url}`,
           });
         } else {
           // Otherwise, add it to the map
@@ -172,7 +178,7 @@ export default {
             ...item,
             name,
             marketable: description.marketable,
-            image: `http://cdn.steamcommunity.com/economy/image/${description.icon_url}`,
+            image: `${steamImageUrl}/${description.icon_url}`,
           });
         }
       }
