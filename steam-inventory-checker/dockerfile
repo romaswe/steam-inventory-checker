@@ -13,6 +13,8 @@ RUN npm install && npm cache clean --force
 # Copy the rest of the application files
 COPY . .
 
+RUN npm run lint
+
 # Build the application
 RUN npm run build
 

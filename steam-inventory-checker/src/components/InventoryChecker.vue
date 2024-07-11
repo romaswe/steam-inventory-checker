@@ -110,72 +110,84 @@ export default {
   },
   methods: {
     async fetchInventory() {
-      this.isLoading = true; // Start the loading spinner
-      this.error = null; // Reset error
       try {
-        let startAssetId = 0;
-        let moreItems = true;
-        this.items = [];
+        this.isLoading = true;
+        this.error = null;
 
-        while (moreItems) {
-          const response = await fetch(
-            `http://localhost:3000/inventory/${this.steamId}/${
-              this.gameInfo.appId
-            }/${this.gameInfo.contextId}?${
-              startAssetId ? `&start_assetid=${startAssetId}` : ""
-            }`
-          );
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
+        const response = await fetch(
+          `http://localhost:3000/inventory/${this.steamId}/${this.gameInfo.appId}/${this.gameInfo.contextId}`
+        );
 
-          const data = await response.json();
-          if (data.descriptions) {
-            this.items.push(
-              ...data.descriptions.map((item) => ({
-                name: item.name.trim().toLowerCase(),
-                marketable: item.marketable === 1,
-                image: `http://cdn.steamcommunity.com/economy/image/${item.icon_url}`,
-              }))
-            );
-          }
-
-          moreItems = data.more_items;
-          if (moreItems) {
-            startAssetId = data.last_assetid;
-          }
+        if (!response.ok) {
+          throw new Error("Failed to fetch inventory");
         }
 
-        if (this.items.length === 0) {
-          this.error = "No items found";
-        } else {
-          this.findDuplicates();
+        const data = await response.json();
+
+        if (!data || !data.assets || !data.descriptions) {
+          throw new Error("Invalid inventory data received");
         }
+
+        const assets = data.assets || [];
+        const descriptions = data.descriptions || [];
+
+        const { duplicates, sortedItems } = this.findDuplicates(
+          assets,
+          descriptions
+        );
+
+        this.items = sortedItems;
+        this.duplicateItems = duplicates;
       } catch (error) {
-        console.error("Error fetching inventory:", error);
-        this.error =
-          "Failed to fetch inventory. Please check the Steam ID and App ID.";
+        this.error = error.message;
       } finally {
-        this.isLoading = false; // Stop the loading spinner
+        this.isLoading = false;
       }
     },
-    findDuplicates() {
-      const itemCounts = this.items.reduce((acc, item) => {
-        acc[item.name] = acc[item.name] || {
-          count: 0,
-          marketable: item.marketable,
-          image: item.image,
-        };
-        acc[item.name].count += 1;
-        return acc;
-      }, {});
-      this.duplicateItems = Object.keys(itemCounts)
-        .filter((name) => itemCounts[name].count > 1)
-        .map((name) => ({
-          name,
-          marketable: itemCounts[name].marketable,
-          image: itemCounts[name].image,
-        }));
+    findDuplicates(items, descriptions) {
+      const itemMap = new Map();
+      const duplicates = [];
+
+      // Loop through all items
+      for (const item of items) {
+        const description = descriptions.find(
+          (desc) => desc.classid === item.classid
+        );
+
+        if (!description) continue;
+
+        const name = description.name.trim();
+
+        if (itemMap.has(name)) {
+          // If the name already exists in the map, it's a duplicate
+          duplicates.push({
+            ...item,
+            name,
+            marketable: description.marketable,
+            image: `http://cdn.steamcommunity.com/economy/image/${description.icon_url}`,
+          });
+        } else {
+          // Otherwise, add it to the map
+          itemMap.set(name, {
+            ...item,
+            name,
+            marketable: description.marketable,
+            image: `http://cdn.steamcommunity.com/economy/image/${description.icon_url}`,
+          });
+        }
+      }
+
+      // Sort duplicates and original items so marketable items come first
+      duplicates.sort((a, b) => b.marketable - a.marketable);
+
+      const sortedItems = Array.from(itemMap.values()).sort(
+        (a, b) => b.marketable - a.marketable
+      );
+
+      return {
+        duplicates,
+        sortedItems,
+      };
     },
     toggleDuplicateItems() {
       this.showDuplicateItems = !this.showDuplicateItems;
