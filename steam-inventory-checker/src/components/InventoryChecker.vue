@@ -41,7 +41,12 @@
         <h2>Duplicate Items ({{ sortedDuplicateItems.length }})</h2>
         <ul v-if="sortedDuplicateItems.length">
           <li v-for="(item, index) in sortedDuplicateItems" :key="index">
-            <img :src="item.image" alt="Item image" class="item-image" />
+            <img
+              :src="item.image"
+              alt="Item image"
+              class="item-image"
+              loading="lazy"
+            />
             <span
               >{{ item.name }} - Marketable:
               {{ item.marketable ? "Yes" : "No" }}</span
@@ -54,7 +59,12 @@
         <h2>Inventory Items ({{ sortedItems.length }})</h2>
         <ul>
           <li v-for="(item, index) in sortedItems" :key="index">
-            <img :src="item.image" alt="Item image" class="item-image" />
+            <img
+              :src="item.image"
+              alt="Item image"
+              class="item-image"
+              loading="lazy"
+            />
             <span
               >{{ item.name }} - Marketable:
               {{ item.marketable ? "Yes" : "No" }}</span
