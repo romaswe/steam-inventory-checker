@@ -172,7 +172,7 @@ export default {
         const name = description.name.trim();
         const steamImageUrl =
           process.env.VUE_APP_STEAM_IMAGE_URL ||
-          "http://cdn.steamcommunity.com/economy/image";
+          "https://cdn.steamcommunity.com/economy/image";
 
         if (itemMap.has(name)) {
           // If the name already exists in the map, it's a duplicate
